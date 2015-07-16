@@ -12,10 +12,10 @@ https://support.google.com/chrome/answer/3517349?hl=en
 Known Limits
 ------
 
-- DOES NOT WORK WITH HTTPS: Google does not pass HTTPS traffic with DCP. The only way to do that is do a MITM by yourself, which is obviously terrible.
-- Only works with Python 2.7.9+: I need ```SSLContext```. Especially when you are using OSX, you need to get the latest Python by yourself. More about it: https://stackoverflow.com/questions/28228214/ssl-module-object-has-no-attribute-sslcontext 
-- Could not working with large files.
-- Your network admin can FORCE you to use the HTTP version of this proxy, so they can look into your traffic. I am giving an warning if that happens, but this code is NOT tested to make sure it is safe from attacks including but not limited to SSLStrip. Use at your own risk.
+- **DOES NOT WORK WITH HTTPS**: Google does not pass HTTPS traffic with DCP. The only way to do that is do a MITM by yourself, which is obviously terrible. You can use the PAC file to redirect HTTPS traffic to DIRECT though.
+- Only works with **Python 2.7.9+**: I need ```SSLContext```. Especially when you are using OSX, you need to get the latest Python by yourself. More about it: https://stackoverflow.com/questions/28228214/ssl-module-object-has-no-attribute-sslcontext 
+- Could be not working with large files.
+- Your network admin can FORCE you to use the HTTP version of this proxy, so they can look into your traffic. I am giving an warning if that happens, but this code is **NOT** tested to make sure it is safe from attacks including but not limited to SSLStrip. Use at your own risk.
 
 Usage
 ------
@@ -37,6 +37,7 @@ Requirement
 
 - Python 2.7.9+
 - ```ssl``` package, as in openssl
+- Highly recommended: Proxy SwitchyOmega (https://github.com/FelisCatus/SwitchyOmega) or alternatives.
 
 Author
 -----
@@ -51,3 +52,9 @@ License
 GPLv2.
 
 This program is provided **as is**, with absolutely no warranty.
+
+History
+----
+0.0.2: Add PAC file to use with plugins to redirect non-HTTP traffic so you won't feel any lag.
+
+0.0.1: The very start

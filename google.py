@@ -84,6 +84,24 @@ class Handler(BaseHTTPRequestHandler):
         except socket.error: pass
 
     def sogouProxy(self):
+        if self.headers["Host"].startswith('chrome_dcp_proxy_pac.cnbeining'):  #Give a PAC file
+            self.wfile.write("HTTP/1.1 200 OK".encode('ascii') + b'\r\n')
+            hstr = '''Host: 127.0.0.1
+
+function FindProxyForURL(url, host) {
+  if (url.substring(0,5) == 'http:' && 
+      !isPlainHostName(host) && 
+      !shExpMatch(host, '*.local') && 
+      !isInNet(dnsResolve(host), '10.0.0.0', '255.0.0.0') && 
+      !isInNet(dnsResolve(host), '172.16.0.0',  '255.240.0.0') && 
+      !isInNet(dnsResolve(host), '192.168.0.0',  '255.255.0.0') && 
+      !isInNet(dnsResolve(host), '127.0.0.0', '255.255.255.0') ) 
+    return 'PROXY ''' + server_ip + ':' + str(server_port) + '''; DIRECT';
+  return 'DIRECT';
+}'''
+            self.wfile.write(hstr + b'\r\n')
+            return
+            
         if self.remote is None or self.lastHost != self.headers["Host"]:
             if PROXY_MODE == 'HTTPS':
                 context = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
@@ -119,7 +137,7 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write("".join(hlist) + b'\r\n')
 
         if self.command == "CONNECT":  # NO HTTPS, as Chrome DCP does not allow HTTPS traffic
-            return None
+            return
         else:
             while True:
                 response_data = response.read(BufferSize)
@@ -128,24 +146,26 @@ class Handler(BaseHTTPRequestHandler):
 
     do_POST = do_GET = do_CONNECT = sogouProxy
 
-class ThreadingHTTPServer(ThreadingMixIn, HTTPServer): 
+class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
     address_family = socket.AF_INET6
 
 
 if __name__=='__main__':
+    global server_ip, server_port
     parser = argparse.ArgumentParser()
     parser.add_argument('-p', '--port', default=8080)
     parser.add_argument('-m', '--mode', default= 'HTTPS')
     parser.add_argument('-i', '--ip', default= '')
     args = vars(parser.parse_args())
-    if str(args['mode']).upper() == 'HTTP' or str(args['mode']).upper() == 'HTTPS':
-        PROXY_MODE = args['mode'].upper()
-    else:
-        PROXY_MODE = check_if_ssl()
-    server_address = (str(args['ip']), int(args['port']))
+    PROXY_MODE = args['mode'].upper() if str(args['mode']).upper() == 'HTTP' or str(args['mode']).upper() == 'HTTPS' else check_if_ssl()
+    server_ip, server_port = str(args['ip']), int(args['port'])
+    server_address = (server_ip, server_port)
     server = ThreadingHTTPServer(server_address, Handler)
+    if not server_ip:
+        server_ip = '127.0.0.1'
     proxy_host = "proxy.googlezip.net:443" if PROXY_MODE == 'HTTPS' else "compress.googlezip.net:80"
     print('Proxy over %s.\nPlease set your browser\'s proxy to %s.' % (proxy_host, server_address))
+    print('Or use PAC file: http://chrome_dcp_proxy_pac.cnbeining.com/1.pac')
     try:
         server.serve_forever()
     except:
