@@ -16,6 +16,7 @@ Known Limits
 - Only works with **Python 2.7.9+**: I need ```SSLContext```. Especially when you are using OSX, you need to get the latest Python by yourself. More about it: https://stackoverflow.com/questions/28228214/ssl-module-object-has-no-attribute-sslcontext 
 - Could be not working with large files.
 - Your network admin can FORCE you to use the HTTP version of this proxy, so they can look into your traffic. I am giving an warning if that happens, but this code is **NOT** tested to make sure it is safe from attacks including but not limited to SSLStrip. Use at your own risk.
+- As Google Global Cache can be located in your ISP's data center, you should expect **NO PRIVACY** of your traffic with this proxy.
 
 Usage
 ------
@@ -26,7 +27,7 @@ Usage
         The port this proxy is listening on.
     
     -m: Default: HTTPS
-        The mode, HTTPS or HTTP.
+        The mode, HTTPS or HTTP. If not set, the proxy will try HTTPS, and fall back to HTTP should required.
     
     -i: Default: ''
         The IP address this proxy is listening on.
@@ -55,6 +56,8 @@ This program is provided **as is**, with absolutely no warranty.
 
 History
 ----
+0.0.3: Fix PAC problem.
+
 0.0.2: Add PAC file to use with plugins to redirect non-HTTP traffic so you won't feel any lag.
 
 0.0.1: The very start

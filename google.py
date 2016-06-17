@@ -84,9 +84,11 @@ class Handler(BaseHTTPRequestHandler):
         except socket.error: pass
 
     def sogouProxy(self):
-        if self.headers["Host"].startswith('chrome_dcp_proxy_pac.cnbeining'):  #Give a PAC file
-            self.wfile.write("HTTP/1.1 200 OK".encode('ascii') + b'\r\n')
-            hstr = '''Host: 127.0.0.1
+        if "Host" in self.headers:
+            print('Connecting: ' + self.headers["Host"])
+            if self.headers["Host"].startswith('chrome_dcp_proxy_pac.cnbeining'):  #Give a PAC file
+                self.wfile.write("HTTP/1.1 200 OK".encode('ascii') + b'\r\n')
+                hstr = '''Host: 127.0.0.1
 
 function FindProxyForURL(url, host) {
   if (url.substring(0,5) == 'http:' && 
@@ -99,8 +101,8 @@ function FindProxyForURL(url, host) {
     return 'PROXY ''' + server_ip + ':' + str(server_port) + '''; DIRECT';
   return 'DIRECT';
 }'''
-            self.wfile.write(hstr + b'\r\n')
-            return
+                self.wfile.write(hstr + b'\r\n')
+                return
             
         if self.remote is None or self.lastHost != self.headers["Host"]:
             if PROXY_MODE == 'HTTPS':
